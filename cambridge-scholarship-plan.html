@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cambridge Scholarship Countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* layout: big deadline countdown over a tabbed view — 20-day plan / documents checklist / rationale */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;padding:0}
+:root{
+  --bg:#f2f5f4; --surface:#ffffff; --surface-2:#e8eeec; --fg:#17241f; --muted:#5b6b66;
+  --border:#d6dedb; --accent:#2f6e5e; --accent-ink:#ffffff; --accent2:#8aa88f;
+  --good:#2f7d4a; --good-bg:#e3f1e6; --warn:#9a6b17; --warn-bg:#f6ecd4; --bad:#9a3b2f; --bad-bg:#f1e2e0;
+  --font-display:"Spectral",ui-serif,Georgia,serif; --font-body:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121a17; --surface:#1b2622; --surface-2:#22302b; --fg:#e7efea; --muted:#9bb0a8;
+    --border:#334039; --accent:#7fc9a8; --accent-ink:#0f1813; --accent2:#4f7a5e;
+    --good:#7fc488; --good-bg:#1f3626; --warn:#e0b355; --warn-bg:#3a3020; --bad:#e08276; --bad-bg:#3a2522;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121a17; --surface:#1b2622; --surface-2:#22302b; --fg:#e7efea; --muted:#9bb0a8;
+  --border:#334039; --accent:#7fc9a8; --accent-ink:#0f1813; --accent2:#4f7a5e;
+  --good:#7fc488; --good-bg:#1f3626; --warn:#e0b355; --warn-bg:#3a3020; --bad:#e08276; --bad-bg:#3a2522;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:1.6rem;letter-spacing:-0.01em}
+h2{font-size:1.1rem;margin-bottom:2px}
+.lede{color:var(--muted);font-size:0.95rem;margin-top:6px;max-width:64ch}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-top:18px;padding-bottom:10px;z-index:5;border-bottom:1px solid var(--border)}
+.header-top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.header-toggle{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:999px;padding:5px 11px 5px 9px;cursor:pointer;flex:none}
+.header-toggle .chevron{transform:rotate(-45deg)}
+.header-toggle.open .chevron{transform:rotate(45deg)}
+.header-details{margin-top:10px}
+.header-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;align-items:stretch}
+.deadline-bar{flex:1;min-width:220px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.deadline-bar .label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
+.deadline-bar .big-count{font-family:var(--font-mono);font-weight:700;font-size:1.7rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.deadline-bar.urgent .big-count{color:var(--bad)}
+.radial-wrap{flex:none;position:relative;width:76px;min-height:76px;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.radial-svg{width:60px;height:60px;transform:rotate(-90deg)}
+.radial-track{fill:none;stroke:var(--surface-2);stroke-width:9}
+.radial-fill{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .4s ease,stroke .4s ease}
+.radial-wrap.complete{box-shadow:0 0 0 2px #d4af37,0 0 14px 1px rgba(212,175,55,0.55)}
+.radial-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.radial-pct{font-family:var(--font-mono);font-weight:700;font-size:0.92rem;color:var(--fg);font-variant-numeric:tabular-nums;line-height:1.1}
+.radial-sub{font-family:var(--font-mono);font-size:0.56rem;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:1px}
+.tabs{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.tab{font-family:var(--font-mono);font-size:0.82rem;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+section.panel{display:none;margin-top:22px}
+section.panel.active{display:block}
+.callout{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin:14px 0;font-size:0.92rem}
+.callout.warn{border-left-color:var(--warn)}
+.callout h3{font-size:0.95rem;margin-bottom:4px}
+.callout ul{margin:6px 0 0;padding-left:1.1em}
+.notes-block{margin:14px 0}
+.notes-block summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.82rem;color:var(--muted);padding:9px 2px}
+.notes-block summary::-webkit-details-marker{display:none}
+.notes-block[open] summary .chevron{transform:rotate(45deg)}
+.notes-body{padding-top:4px}
+.chevron{flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s ease;margin-right:2px;display:inline-block}
+.sprint-toolbar{display:flex;gap:8px;margin:4px 0 14px;flex-wrap:wrap}
+.toolbar-btn{font-family:var(--font-mono);font-size:0.78rem;padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--fg);cursor:pointer}
+.toolbar-btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.toolbar-overflow{position:relative;margin-left:auto}
+.overflow-btn{font-size:1.1rem;line-height:1;padding:7px 14px;font-weight:700}
+.overflow-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);padding:6px;min-width:190px;z-index:10}
+.overflow-item{display:block;width:100%;text-align:left;font-family:var(--font-body);font-size:0.85rem;padding:9px 11px;border-radius:7px;border:none;background:none;color:var(--fg);cursor:pointer}
+.overflow-item:hover{background:var(--surface-2)}
+.overflow-item.danger{color:var(--bad)}
+.sync-status{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:8px}
+.sync-status .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex:none}
+.sync-status.live .dot{background:var(--good)}
+.sync-status.live{color:var(--good)}
+.phase{margin-bottom:22px}
+.phase-head{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px}
+.phase h3{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:0}
+details.day{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;margin-bottom:10px;scroll-margin-top:220px}
+details.day.today{border-color:var(--accent);border-width:2px}
+details.day[open]{padding-bottom:12px}
+.day summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.day summary::-webkit-details-marker{display:none}
+details.day[open] .chevron{transform:rotate(45deg)}
+.day-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+.day-date{font-family:var(--font-mono);font-weight:600;font-size:0.9rem;min-width:7em}
+.day-tag{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.today-badge{font-family:var(--font-mono);font-size:0.65rem;font-weight:700;letter-spacing:0.04em;background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 6px}
+.day-progress{margin-left:auto;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:0.78rem;color:var(--muted);flex:none;display:flex;align-items:center;gap:6px}
+.day-progress .mini-bar{width:40px;height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.day-progress .mini-bar>i{display:block;height:100%;background:var(--accent)}
+.day-body{padding:0 14px 2px}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:flex-start;gap:11px;min-width:0}
+.item input{margin-top:2px;flex:none;width:19px;height:19px;accent-color:var(--accent);cursor:pointer}
+.item label{min-width:0;flex:1;cursor:pointer;padding-top:1px}
+.item.done label{color:var(--muted);text-decoration:line-through}
+.day-notes{margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)}
+.day-notes-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.day-notes-saved{font-family:var(--font-mono);font-size:0.65rem;color:var(--good);opacity:0;transition:opacity .3s ease}
+.day-notes-saved.show{opacity:1}
+.day-notes textarea{width:100%;min-height:64px;resize:vertical;font-family:var(--font-body);font-size:0.88rem;color:var(--fg);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;line-height:1.45}
+.day-notes textarea::placeholder{color:var(--muted)}
+.day-notes textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.group-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin:10px 0 6px;display:flex;align-items:center;gap:6px}
+.group-label:first-child{margin-top:0}
+.sec-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.checklist-group{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.checklist-group h3{font-size:0.95rem;margin-bottom:10px}
+footer.note{margin-top:28px;font-size:0.8rem;color:var(--muted);border-top:1px solid var(--border);padding-top:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+@media (max-width:620px){.two-col{grid-template-columns:1fr}}
+.principle{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.principle h3{font-size:0.9rem;margin-bottom:4px}
+.principle p{font-size:0.85rem;color:var(--muted);margin:0}
+a{color:var(--accent)}
+@media (max-width:480px){
+  header.top{padding-top:12px;padding-bottom:8px}
+  .header-top-row{flex-direction:column;align-items:flex-start;gap:8px}
+  .header-toggle{align-self:flex-start}
+  h1{font-size:1.28rem;line-height:1.15}
+  .header-stats{margin-top:10px;gap:10px}
+  .deadline-bar{padding:10px 12px;gap:8px}
+  .deadline-bar .label{font-size:0.66rem}
+  .deadline-bar .big-count{font-size:1.28rem}
+  .radial-wrap{width:64px;min-height:64px}
+  .radial-svg{width:50px;height:50px}
+  .radial-pct{font-size:0.8rem}
+  .radial-sub{font-size:0.5rem}
+  .tabs{margin-top:10px;gap:6px}
+  .tab{padding:6px 11px;font-size:0.76rem}
+  .wrap{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="header-top-row">
+      <h1>Cambridge Scholarship Countdown</h1>
+      <button class="header-toggle" id="headerToggle" aria-expanded="false" aria-controls="headerDetails">
+        <span class="chevron"></span><span>Details</span>
+      </button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" data-tab="plan" role="tab" aria-selected="true">20-day plan</button>
+      <button class="tab" data-tab="docs" role="tab" aria-selected="false">Documents checklist</button>
+      <button class="tab" data-tab="notes" role="tab" aria-selected="false">Notes</button>
+      <button class="tab" data-tab="rules" role="tab" aria-selected="false">Why this shape</button>
+    </div>
+    <div class="header-details" id="headerDetails" hidden>
+      <p class="lede">Mastercard Foundation Scholars Program application for the MPhil in Nuclear Energy (taught), University of Cambridge — course application, Mastercard Foundation scholarship statement, references, and every supporting document, from a blank page to submission.</p>
+    </div>
+    <div class="header-stats">
+      <div class="deadline-bar" id="deadlineBar"></div>
+      <div class="radial-wrap" title="Overall progress across the 20-day plan and the documents checklist">
+        <svg viewBox="0 0 60 60" class="radial-svg">
+          <circle class="radial-track" cx="30" cy="30" r="24"></circle>
+          <circle class="radial-fill" id="radialFill" cx="30" cy="30" r="24"></circle>
+        </svg>
+        <div class="radial-label">
+          <div class="radial-pct" id="radialPct">0%</div>
+          <div class="radial-sub" id="radialSub">0/0</div>
+        </div>
+      </div>
+    </div>
+    <div class="sync-status" id="syncStatus"><span class="dot"></span><span>Checking for a shared server…</span></div>
+  </header>
+
+  <section class="panel active" id="panel-plan">
+    <details class="notes-block">
+      <summary><span class="chevron"></span>Before day 1: verify this deadline</summary>
+      <div class="notes-body">
+        <div class="callout warn">
+          <h3>Oct 30 doesn't match what general search turned up</h3>
+          <p>Cambridge's own Mastercard Foundation page and aggregator sites both describe funding deadlines that are typically <b>early December or early January</b>, varying by course, with a separate <b>18 November</b> fee-waiver-form deadline. I couldn't find an official page listing a 30 October date specifically for the MPhil in Nuclear Energy. That doesn't mean it's wrong — course-specific deadlines do vary, and you may know something my search didn't surface — but given how much rides on this, <b>day 1's very first task is confirming the real date</b> directly on the <a href="https://www.graduate.study.cam.ac.uk/" target="_blank" rel="noopener">Postgraduate Admissions course page</a> for Nuclear Energy and inside the application portal itself, not from a search result or this plan. If it turns out to actually be December or January, that changes the pacing of everything below for the better — tell me and I'll rebuild this with real slack.</p>
+        </div>
+      </div>
+    </details>
+    <div class="sprint-toolbar" id="planToolbar"></div>
+    <div id="planDays"></div>
+  </section>
+
+  <section class="panel" id="panel-docs">
+    <h2>Every piece the application needs</h2>
+    <p class="lede">Checked against Cambridge's own Mastercard Foundation page and the Engineering Department's entrance-requirements page — but neither lists a definitive, final checklist for this exact course, so treat this as a strong starting list to confirm against the portal on day 1, not the final word.</p>
+    <div id="docsGroups"></div>
+  </section>
+
+  <section class="panel" id="panel-notes">
+    <h2>Everything you've jotted down</h2>
+    <p class="lede">The same notes as the day cards on the plan tab — edit here or there, it's the same saved text either way.</p>
+    <div id="notesOverview"></div>
+  </section>
+
+  <section class="panel" id="panel-rules">
+    <h2>Why this shape</h2>
+    <div class="two-col">
+      <div class="principle"><h3>References get requested on day 1, not day 10</h3><p>Everything else here is work you control directly. A reference letter depends on someone else's calendar, and that's the single biggest risk to the whole 20 days — so it goes out immediately, with a requested return date that leaves you a buffer before the real deadline, not the deadline itself.</p></div>
+      <div class="principle"><h3>Two statements, not one</h3><p>The course application wants a statement of interest focused on your academic/technical fit for Nuclear Energy at Cambridge. The Mastercard Foundation scholarship statement is a separate, mandatory document focused on leadership, community commitment, and your contribution to climate-resilient, sustainable futures for Africa. They share research and reflection, but they're answering different questions for different readers — drafting them as one blended essay is the most common mistake here.</p></div>
+      <div class="principle"><h3>There is exactly one buffer day in this plan</h3><p>Day 19 (Oct 29) is deliberately unscheduled slack, not a victory lap. If a reference is late, a revision runs long, or the portal has a field nobody warned you about, that's the day it gets absorbed. If everything else stays on track, it becomes a calm final read-through instead — but it is not there to be used for anything new.</p></div>
+      <div class="principle"><h3>Your own course-building work is real evidence</h3><p>You've already been building a full Nuclear Energy MPhil prep track — Reactor Physics, Thermal-Hydraulics, the rest — node by node, for months. That's genuine, self-directed, sustained initiative in exactly this field, done before anyone asked you to. Both statements should use it as concrete evidence, not leave it out as "just a side project."</p></div>
+      <div class="principle"><h3>Evaluation rounds need real turnaround time, so they're scheduled, not squeezed in</h3><p>Day 9 sends both drafts out with a hard return date; days 10–12 are logistics work that keeps moving while you wait, specifically so the waiting doesn't stall the plan. A second, lighter read on day 16 is the realistic ceiling for this timeline — not the two or three rounds a less rushed application could afford.</p></div>
+      <div class="principle"><h3>This is now the priority over the October learning sprint</h3><p>The existing Python/Rust/algo-trading/growth/scripture/fitness plan runs through Oct 31 and overlaps this almost entirely. Scaling it back to the lightest-touch items (the habits, maybe push-ups) for these 20 days is the honest call, given a scholarship deadline outranks a self-imposed one — say the word and I'll adjust that plan directly rather than leaving the two silently competing for the same hours.</p></div>
+    </div>
+  </section>
+
+  <footer class="note">Checkboxes save locally in this browser only. This plan is built from public Cambridge and Mastercard Foundation pages, not your account on the portal — confirm every date and document requirement there before treating anything here as final.</footer>
+</div>
+
+<script>
+(async function(){
+  try{
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
+        t.setAttribute('aria-selected','true');
+        document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+        document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+      });
+    });
+  }catch(e){}
+
+  try{
+    var HEADER_KEY = 'csc_header_open';
+    var headerBtn = document.getElementById('headerToggle');
+    var headerDetails = document.getElementById('headerDetails');
+    var headerOpen = localStorage.getItem(HEADER_KEY) === '1';
+    function setHeaderOpen(open){
+      headerOpen = open;
+      headerDetails.hidden = !open;
+      headerBtn.classList.toggle('open', open);
+      headerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      try{ localStorage.setItem(HEADER_KEY, open ? '1' : '0'); }catch(e){}
+    }
+    setHeaderOpen(headerOpen);
+    headerBtn.addEventListener('click', function(){ setHeaderOpen(!headerOpen); });
+  }catch(e){}
+
+  var STORE_KEY = 'csc_checked_v1';
+  var NOTES_KEY = 'csc_notes_v1';
+  function loadChecked(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }catch(e){ return {}; } }
+  function loadNotes(){ try{ return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); }catch(e){ return {}; } }
+
+  // ---- shared state (checked + notes), synced to server.py when it's running ----
+  // When this page is opened via file:// (just double-clicked), the fetch
+  // below fails immediately and everything quietly falls back to this
+  // browser's own localStorage, exactly as before. When it's opened through
+  // server.py (python3 server.py, then the printed network URL from any
+  // device), the server's data.json becomes the shared source of truth, so
+  // every device sees the same checkboxes and notes.
+  var useServer = false;
+  var checked = {}, notes = {};
+  try{
+    var initRes = await fetch('/api/state', {cache:'no-store'});
+    if(initRes.ok){
+      var initData = await initRes.json();
+      checked = initData.checked || {};
+      notes = initData.notes || {};
+      useServer = true;
+    }
+  }catch(e){}
+  if(!useServer){
+    checked = loadChecked();
+    notes = loadNotes();
+  }
+  (function(){
+    var el = document.getElementById('syncStatus');
+    if(!el) return;
+    el.classList.toggle('live', useServer);
+    el.innerHTML = '<span class="dot"></span><span>'+(useServer
+      ? 'Synced via server.py — visible on every device on this network'
+      : 'Saved only in this browser — run server.py to sync across devices') + '</span>';
+  })();
+
+  var syncTimer = null;
+  function pushToServer(){
+    if(!useServer) return;
+    fetch('/api/state', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({checked:checked, notes:notes})
+    }).catch(function(){ /* server dropped; localStorage below still has it */ });
+  }
+  function scheduleSync(){ clearTimeout(syncTimer); syncTimer = setTimeout(pushToServer, 400); }
+  function saveChecked(obj){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }catch(e){} scheduleSync(); }
+  function saveNotes(obj){ try{ localStorage.setItem(NOTES_KEY, JSON.stringify(obj)); }catch(e){} scheduleSync(); }
+
+  // Both the plan tab's per-day card and the Notes tab edit the same
+  // underlying note, via different textareas (two ids per day, 'notes-N'
+  // and 'notes2-N'). Writing from either one updates storage and pushes the
+  // new value into whichever other textarea exists, so they never drift.
+  var noteFieldIds = { primary: function(i){ return 'notes-'+i; }, overview: function(i){ return 'notes2-'+i; } };
+  function writeNote(i, value, exceptId){
+    notes[i] = value;
+    saveNotes(notes);
+    [noteFieldIds.primary(i), noteFieldIds.overview(i)].forEach(function(id){
+      if(id === exceptId) return;
+      var el = document.getElementById(id);
+      if(el && el.value !== value) el.value = value;
+    });
+    ['saved-'+i, 'saved2-'+i].forEach(function(savedId){
+      var savedEl = document.getElementById(savedId);
+      if(!savedEl) return;
+      savedEl.classList.add('show');
+      clearTimeout(savedEl._hideTimer);
+      savedEl._hideTimer = setTimeout(function(){ savedEl.classList.remove('show'); }, 1200);
+    });
+  }
+  function buildNoteField(dayIndex, idPrefix, savedPrefix){
+    var wrap = document.createElement('div'); wrap.className='day-notes';
+    var label = document.createElement('div'); label.className='day-notes-label';
+    label.innerHTML = '<span>Notes</span><span class="day-notes-saved" id="'+savedPrefix+'-'+dayIndex+'">Saved</span>';
+    wrap.appendChild(label);
+    var ta = document.createElement('textarea');
+    ta.id = idPrefix+'-'+dayIndex;
+    ta.placeholder = 'Anything worth remembering about this day — a referee’s reply, a line to reuse, a question to ask tomorrow…';
+    ta.value = notes[dayIndex] || '';
+    var saveTimer = null;
+    ta.addEventListener('input', function(){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(function(){ writeNote(dayIndex, ta.value, ta.id); }, 400);
+    });
+    wrap.appendChild(ta);
+    return wrap;
+  }
+
+  function it(id,label){ return {id:id,label:label}; }
+
+  var days = [
+    {date:'Sun, Oct 11', phase:'Recon & kickoff', items:[
+      it('d1-deadline','Confirm the real deadline + required documents on the official Postgraduate Admissions Nuclear Energy course page and inside the application portal'),
+      it('d1-account','Create an account on the Postgraduate Applicant Portal and open (don’t submit) the application to see Cambridge’s own document checklist'),
+      it('d1-referees','Identify 2–3 potential referees'),
+      it('d1-doclist','Write out every document you’ll personally need to gather (transcripts, degree certificate, passport, photos)')
+    ]},
+    {date:'Mon, Oct 12', phase:'Recon & kickoff', items:[
+      it('d2-referee-email','Email every referee today: context, your CV/background, the real deadline, and a requested return date of ~Oct 24'),
+      it('d2-transcripts','Request official transcripts / degree certificate from your university’s registrar'),
+      it('d2-passport','Scan your passport photo page'),
+      it('d2-feewaiver','Check Cambridge’s fee-waiver country list; if not covered, start the Application Fee Waiver Form')
+    ]},
+    {date:'Tue, Oct 13', phase:'Research', items:[
+      it('d3-mcf','Read the Mastercard Foundation Scholars Program mission and any public past-scholar profiles or statements'),
+      it('d3-course','Research the MPhil Nuclear Energy course in depth: modules, faculty, research groups, the final research project — note specifics to reference by name'),
+      it('d3-evidence','List your own concrete evidence: leadership moments, community impact, nuclear-relevant projects — include the Nuclear MPhil prep course you’ve been building')
+    ]},
+    {date:'Wed, Oct 14', phase:'Outline', items:[
+      it('d4-sop-outline','Outline the course Statement of Purpose: why nuclear energy, why Cambridge specifically, relevant background, career goal'),
+      it('d4-cv','Draft CV v1')
+    ]},
+    {date:'Thu, Oct 15', phase:'Outline', items:[
+      it('d5-mcf-outline','Outline the Mastercard Foundation scholarship statement: background, leadership potential, commitment to climate-resilient & sustainable futures for Africa, how Cambridge advances that'),
+      it('d5-cv-review','Finalize CV v1 and get it in front of one reviewer')
+    ]},
+    {date:'Fri, Oct 16', phase:'First drafts', items:[
+      it('d6-sop-draft','Write a complete first draft of the course Statement of Purpose, start to finish — don’t edit yet')
+    ]},
+    {date:'Sat, Oct 17', phase:'First drafts', items:[
+      it('d7-mcf-draft','Write a complete first draft of the Mastercard Foundation scholarship statement')
+    ]},
+    {date:'Sun, Oct 18', phase:'Self-edit', items:[
+      it('d8-reread','Reread both drafts cold — cut anything generic, sharpen specifics'),
+      it('d8-limits','Check both against any word/character limits found on the portal on day 1')
+    ]},
+    {date:'Mon, Oct 19', phase:'Send for evaluation', items:[
+      it('d9-cv-v2','Finalize CV v2'),
+      it('d9-referee-check','Follow up with referees — confirm they’ve started'),
+      it('d9-send','Send both statement drafts to 2–3 evaluators (mentors, professors, a past Mastercard Scholar if reachable, a trusted peer) with a hard return-by date of ~Oct 23')
+    ]},
+    {date:'Tue, Oct 20', phase:'Logistics while waiting', items:[
+      it('d10-transcripts','Confirm transcripts have arrived, or follow up with the registrar'),
+      it('d10-docs','Confirm passport scan and fee-waiver-form status'),
+      it('d10-reread-mcf','Re-read the official Mastercard Foundation page for anything missed')
+    ]},
+    {date:'Wed, Oct 21', phase:'Logistics while waiting', items:[
+      it('d11-college','Research Cambridge College preferences (part of the application)'),
+      it('d11-portal','Start filling in the portal fields that don’t depend on the final essays — personal details, education history, employment history')
+    ]},
+    {date:'Thu, Oct 22', phase:'Logistics while waiting', items:[
+      it('d12-chase','Chase any evaluator or referee who hasn’t responded yet — this is the highest-risk dependency in the whole plan'),
+      it('d12-portal2','Keep portal fields moving')
+    ]},
+    {date:'Fri, Oct 23', phase:'Feedback due', items:[
+      it('d13-collect','Collect all feedback received; sort into “must fix” vs “nice to have”')
+    ]},
+    {date:'Sat, Oct 24', phase:'Revise', items:[
+      it('d14-sop-revise','Full revision pass on the course Statement of Purpose, incorporating feedback')
+    ]},
+    {date:'Sun, Oct 25', phase:'Revise', items:[
+      it('d15-mcf-revise','Full revision pass on the Mastercard Foundation scholarship statement, incorporating feedback')
+    ]},
+    {date:'Mon, Oct 26', phase:'Second read & verify', items:[
+      it('d16-second-read','Send the revised versions to one trusted fast reader for a 24–48h gut-check — the realistic ceiling for a second round at this point'),
+      it('d16-refs-submitted','Confirm references have actually been submitted on the portal, not just promised — follow up directly if not')
+    ]},
+    {date:'Tue, Oct 27', phase:'Final polish', items:[
+      it('d17-incorporate','Incorporate the quick-read feedback'),
+      it('d17-lineedit','Line-edit both statements for limits, typos, consistent tone'),
+      it('d17-cv-final','Finalize CV')
+    ]},
+    {date:'Wed, Oct 28', phase:'Assemble', items:[
+      it('d18-upload','Upload every document to the portal: transcripts, CV, both statements, passport if needed'),
+      it('d18-college','Select College'),
+      it('d18-funding','Opt into Mastercard Foundation funding in the portal and attach the scholarship statement'),
+      it('d18-check','Double-check every field is complete — nothing left in draft state')
+    ]},
+    {date:'Thu, Oct 29', phase:'Buffer', items:[
+      it('d19-buffer','This day is slack, not new work — finish whatever from the prior 18 days is still outstanding, or do one calm top-to-bottom read-through if nothing is')
+    ]},
+    {date:'Fri, Oct 30', phase:'Submit', items:[
+      it('d20-submit','Submit well before any stated cutoff — not at the last minute'),
+      it('d20-confirm','Save a confirmation PDF or screenshot of the submitted application'),
+      it('d20-thankyou','Email referees a thank-you and confirmation that you’ve submitted')
+    ]}
+  ];
+
+  var totalItems = 0;
+  days.forEach(function(d){ totalItems += d.items.length; });
+
+  function dateForIndex(i){ return new Date(2026,9,11+i); }
+  function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  var now0 = new Date();
+  var todayIdx = -1;
+  for(var ti=0; ti<days.length; ti++){ if(sameDay(dateForIndex(ti), now0)){ todayIdx = ti; break; } }
+
+  var itemIds = days.map(function(){ return []; });
+  var dayBadgeEls = [];
+  function updateDayBadge(i){
+    var el = dayBadgeEls[i];
+    if(!el) return;
+    var ids = itemIds[i], done = 0;
+    ids.forEach(function(id){ if(checked[id]) done++; });
+    var pct = ids.length ? Math.round(done/ids.length*100) : 0;
+    el.querySelector('.count').textContent = done+'/'+ids.length;
+    el.querySelector('.mini-bar > i').style.width = pct+'%';
+  }
+
+  // Overall radial progress: every day-plan item plus every documents-checklist
+  // item, one combined percentage so "done" means the whole application, not
+  // just one tab of it.
+  var docItemIds = [];
+  var radialFill = document.getElementById('radialFill');
+  var radialCircumference = radialFill ? 2*Math.PI*parseFloat(radialFill.getAttribute('r')) : 0;
+  if(radialFill){
+    radialFill.style.strokeDasharray = radialCircumference;
+    radialFill.style.strokeDashoffset = radialCircumference;
+  }
+  // Red at 0%, through orange/yellow, to green approaching 100% (hue 0 -> 120
+  // on the HSL wheel reads as a natural warm-to-cool progression), then gold
+  // exactly at 100% as a distinct "actually done" color rather than just the
+  // greenest green.
+  var GOLD = '#d4af37';
+  function colorForPct(pct){
+    if(pct >= 100) return GOLD;
+    var hue = (pct/100) * 120;
+    return 'hsl('+hue+', 75%, 42%)';
+  }
+  function updateRadial(){
+    var all = itemIds.reduce(function(acc,arr){ return acc.concat(arr); }, []).concat(docItemIds);
+    var total = all.length, done = 0;
+    all.forEach(function(id){ if(checked[id]) done++; });
+    var pct = total ? Math.round(done/total*100) : 0;
+    var color = colorForPct(pct);
+    var pctEl = document.getElementById('radialPct'), subEl = document.getElementById('radialSub');
+    if(pctEl){ pctEl.textContent = pct+'%'; pctEl.style.color = color; }
+    if(subEl) subEl.textContent = done+'/'+total;
+    if(radialFill){
+      radialFill.style.strokeDashoffset = radialCircumference * (1 - pct/100);
+      radialFill.style.stroke = color;
+    }
+    var wrapEl = radialFill ? radialFill.closest('.radial-wrap') : null;
+    if(wrapEl) wrapEl.classList.toggle('complete', pct >= 100);
+  }
+
+  function addItem(container, id, labelText, dayIndex){
+    itemIds[dayIndex].push(id);
+    var row = document.createElement('div'); row.className='item'+(checked[id]?' done':'');
+    var cb = document.createElement('input'); cb.type='checkbox'; cb.id='chk-'+id; cb.checked = !!checked[id];
+    cb.addEventListener('change', function(){
+      checked[id] = cb.checked;
+      row.classList.toggle('done', cb.checked);
+      saveChecked(checked);
+      updateDayBadge(dayIndex);
+      updateRadial();
+    });
+    var label = document.createElement('label'); label.setAttribute('for','chk-'+id); label.textContent = labelText;
+    row.appendChild(cb); row.appendChild(label);
+    container.appendChild(row);
+  }
+
+  var planEl = document.getElementById('planDays');
+  var phases = [];
+  days.forEach(function(d,i){
+    var last = phases[phases.length-1];
+    if(!last || last.name !== d.phase) phases.push({name:d.phase, range:[i,i+1]});
+    else last.range[1] = i+1;
+  });
+
+  phases.forEach(function(ph){
+    var wrap = document.createElement('div'); wrap.className='phase';
+    var phHead = document.createElement('div'); phHead.className='phase-head';
+    var h = document.createElement('h3'); h.textContent = ph.name; phHead.appendChild(h);
+    wrap.appendChild(phHead);
+    for(var i=ph.range[0]; i<ph.range[1]; i++){
+      (function(i){
+        var d = days[i];
+        var isToday = i === todayIdx;
+        var card = document.createElement('details');
+        card.className = 'day'+(isToday?' today':'');
+        if(isToday) card.open = true;
+        card.id = 'day-'+i;
+
+        var summary = document.createElement('summary');
+        var chev = document.createElement('span'); chev.className='chevron'; summary.appendChild(chev);
+        var head = document.createElement('div'); head.className='day-head';
+        head.innerHTML = '<span class="day-date">'+d.date+'</span>' +
+          (isToday ? '<span class="today-badge">TODAY</span>' : '') +
+          '<span class="day-tag">Day '+(i+1)+' of 20</span>';
+        summary.appendChild(head);
+        var badge = document.createElement('div'); badge.className='day-progress';
+        badge.innerHTML = '<span class="count">0/0</span><span class="mini-bar"><i style="width:0%"></i></span>';
+        summary.appendChild(badge);
+        dayBadgeEls[i] = badge;
+        card.appendChild(summary);
+
+        var body = document.createElement('div'); body.className='day-body';
+        var list = document.createElement('div'); list.className='items';
+        d.items.forEach(function(it){ addItem(list, it.id, it.label, i); });
+        body.appendChild(list);
+
+        body.appendChild(buildNoteField(i, 'notes', 'saved'));
+
+        card.appendChild(body);
+        wrap.appendChild(card);
+        updateDayBadge(i);
+      })(i);
+    }
+    planEl.appendChild(wrap);
+  });
+
+  // ---- toolbar ----
+  (function(){
+    var tb = document.getElementById('planToolbar');
+    var btns = [];
+    if(todayIdx >= 0){
+      var jump = document.createElement('button'); jump.className='toolbar-btn primary'; jump.textContent='Jump to today';
+      jump.addEventListener('click', function(){
+        var el = document.getElementById('day-'+todayIdx);
+        if(el){ el.open = true; el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+      btns.push(jump);
+    }
+    var expand = document.createElement('button'); expand.className='toolbar-btn'; expand.textContent='Expand all';
+    expand.addEventListener('click', function(){ document.querySelectorAll('details.day').forEach(function(el){ el.open = true; }); });
+    var collapse = document.createElement('button'); collapse.className='toolbar-btn'; collapse.textContent='Collapse all';
+    collapse.addEventListener('click', function(){ document.querySelectorAll('details.day').forEach(function(el){ el.open = false; }); });
+    btns.push(expand, collapse);
+    btns.forEach(function(b){ tb.appendChild(b); });
+
+    // Reset lives behind an overflow menu, not as its own always-visible
+    // button — it's destructive and rare, so it shouldn't compete for
+    // attention with the buttons used every day.
+    var overflowWrap = document.createElement('div'); overflowWrap.className='toolbar-overflow';
+    var overflowBtn = document.createElement('button');
+    overflowBtn.className = 'toolbar-btn overflow-btn';
+    overflowBtn.textContent = '⋯';
+    overflowBtn.setAttribute('aria-haspopup', 'true');
+    overflowBtn.setAttribute('aria-expanded', 'false');
+    overflowBtn.setAttribute('aria-label', 'More actions');
+    var menu = document.createElement('div'); menu.className='overflow-menu'; menu.hidden = true;
+    var reset = document.createElement('button'); reset.className='overflow-item danger'; reset.textContent='Reset all progress';
+    reset.addEventListener('click', function(){
+      closeMenu();
+      if(!confirm('Reset every checkbox and note? This clears the whole plan'+(useServer?' on every device sharing this server':' in this browser')+' and can’t be undone.')) return;
+      checked = {}; notes = {};
+      try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem(NOTES_KEY); }catch(e){}
+      if(useServer){
+        fetch('/api/state', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({checked:{}, notes:{}})
+        }).catch(function(){}).finally(function(){ location.reload(); });
+      } else {
+        location.reload();
+      }
+    });
+    menu.appendChild(reset);
+
+    function closeMenu(){
+      menu.hidden = true;
+      overflowBtn.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('click', onOutsideClick);
+    }
+    function onOutsideClick(e){
+      if(!overflowWrap.contains(e.target)) closeMenu();
+    }
+    overflowBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      overflowBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      if(willOpen) setTimeout(function(){ document.addEventListener('click', onOutsideClick); }, 0);
+      else document.removeEventListener('click', onOutsideClick);
+    });
+
+    overflowWrap.appendChild(overflowBtn);
+    overflowWrap.appendChild(menu);
+    tb.appendChild(overflowWrap);
+  })();
+
+  if(todayIdx >= 0){
+    setTimeout(function(){
+      var el = document.getElementById('day-'+todayIdx);
+      if(el) el.scrollIntoView({block:'start'});
+    }, 0);
+  }
+
+  // ---- big deadline countdown ----
+  (function(){
+    function pad(n){ return (n<10?'0':'')+n; }
+    var deadline = new Date(2026,9,30,23,59,59);
+    var bar = document.getElementById('deadlineBar');
+    function tick(){
+      var now = new Date();
+      var ms = deadline - now;
+      if(ms <= 0){
+        bar.className = 'deadline-bar urgent';
+        bar.innerHTML = '<span class="label">Deadline</span><span class="big-count">Oct 30 has passed — submit immediately if you haven’t</span>';
+        return;
+      }
+      var totalSec = Math.floor(ms/1000);
+      var d = Math.floor(totalSec/86400), h = Math.floor((totalSec%86400)/3600), m = Math.floor((totalSec%3600)/60), s = totalSec%60;
+      bar.className = 'deadline-bar'+(d < 3 ? ' urgent' : '');
+      bar.innerHTML = '<span class="label">Until Oct 30 deadline</span><span class="big-count">'+d+'d '+pad(h)+'h '+pad(m)+'m '+pad(s)+'s</span>';
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
+  // ---- documents checklist ----
+  (function(){
+    var groups = [
+      {title:'Course application (Postgraduate Applicant Portal)', items:[
+        it('doc-account','Portal account created'),
+        it('doc-personal','Personal details & education history filled in'),
+        it('doc-transcripts','Official transcripts / degree certificate(s) uploaded'),
+        it('doc-cv','CV / Resume (final)'),
+        it('doc-sop','Course Statement of Purpose (final, within any stated limit)'),
+        it('doc-college','College selected')
+      ]},
+      {title:'Mastercard Foundation scholarship', items:[
+        it('doc-funding-opt','Funding option selected in the portal'),
+        it('doc-mcf-statement','Mastercard Foundation scholarship statement (final)')
+      ]},
+      {title:'References', items:[
+        it('doc-ref1-req','Reference #1 requested'),
+        it('doc-ref1-sub','Reference #1 submitted'),
+        it('doc-ref2-req','Reference #2 requested'),
+        it('doc-ref2-sub','Reference #2 submitted'),
+        it('doc-ref3-req','Reference #3 requested (if your course wants three — confirm on day 1)'),
+        it('doc-ref3-sub','Reference #3 submitted')
+      ]},
+      {title:'Supporting documents', items:[
+        it('doc-passport','Passport photo page scanned'),
+        it('doc-feewaiver','Fee Waiver Form submitted (only if your country isn’t on Cambridge’s auto-waiver list)'),
+        it('doc-english','English proficiency (IELTS/TOEFL) noted — not required before applying; confirm after any offer')
+      ]},
+      {title:'Final steps', items:[
+        it('doc-review','Full application read top to bottom before submitting'),
+        it('doc-submitted','Application submitted'),
+        it('doc-confirmation','Confirmation saved (PDF/screenshot)')
+      ]}
+    ];
+    var host = document.getElementById('docsGroups');
+    groups.forEach(function(g){
+      var box = document.createElement('div'); box.className='checklist-group';
+      var h3 = document.createElement('h3'); h3.textContent = g.title; box.appendChild(h3);
+      var list = document.createElement('div'); list.className='items';
+      g.items.forEach(function(it){
+        docItemIds.push(it.id);
+        var row = document.createElement('div'); row.className='item'+(checked[it.id]?' done':'');
+        var cb = document.createElement('input'); cb.type='checkbox'; cb.id='chk-'+it.id; cb.checked = !!checked[it.id];
+        cb.addEventListener('change', function(){
+          checked[it.id] = cb.checked;
+          row.classList.toggle('done', cb.checked);
+          saveChecked(checked);
+          updateRadial();
+        });
+        var label = document.createElement('label'); label.setAttribute('for','chk-'+it.id); label.textContent = it.label;
+        row.appendChild(cb); row.appendChild(label);
+        list.appendChild(row);
+      });
+      box.appendChild(list);
+      host.appendChild(box);
+    });
+    updateRadial();
+  })();
+
+  // ---- notes overview: only days with an actual note, same storage as the plan tab ----
+  // Rebuilt fresh each time the Notes tab is opened (not live on every keystroke,
+  // so an in-progress edit here never has its own card yanked out from under it).
+  function renderNotesOverview(){
+    var host = document.getElementById('notesOverview');
+    host.innerHTML = '';
+    var any = false;
+    days.forEach(function(d, i){
+      if(!(notes[i] && notes[i].trim())) return;
+      any = true;
+      var box = document.createElement('div'); box.className='checklist-group';
+      var h3 = document.createElement('h3'); h3.textContent = d.date+' — Day '+(i+1)+' · '+d.phase; box.appendChild(h3);
+      box.appendChild(buildNoteField(i, 'notes2', 'saved2'));
+      host.appendChild(box);
+    });
+    if(!any){
+      var empty = document.createElement('p'); empty.className='lede';
+      empty.textContent = 'No notes yet — add one from any day card on the plan tab and it’ll show up here.';
+      host.appendChild(empty);
+    }
+  }
+  renderNotesOverview();
+  document.querySelectorAll('.tab[data-tab="notes"]').forEach(function(t){
+    t.addEventListener('click', renderNotesOverview);
+  });
+})();
+</script>
+</body>
+</html>

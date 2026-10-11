@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bits to Reactors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* layout: sticky tab header over a single scrolling column of day-cards / course rows */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;padding:0}
+:root{
+  --bg:#f6f3ec; --surface:#ffffff; --surface-2:#efeadf; --fg:#2a2420; --muted:#6b6256;
+  --border:#ddd4c2; --accent:#b5651d; --accent-ink:#ffffff; --py:#2f6fb5; --rs:#c5631a; --at:#4f7d4a; --xp:#2a2420; --bib:#7a4a8f; --fit:#b5452f; --habit:#4a6b7a;
+  --good:#3f7d4a; --good-bg:#e4f1e3; --warn:#9a6b17; --warn-bg:#f6ecd4; --bad-bg:#f1e2e0; --bad:#9a3b2f;
+  --font-display:"Fraunces",ui-serif,Georgia,serif; --font-body:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1812; --surface:#242019; --surface-2:#2c271e; --fg:#ece6da; --muted:#a79c8a;
+    --border:#413a2d; --accent:#e08b3f; --accent-ink:#1b1812; --py:#6fa8dc; --rs:#e8824a; --at:#8fcf7f; --xp:#ece6da; --bib:#c49fe0; --fit:#e2846b; --habit:#7fb6c9;
+    --good:#7fc488; --good-bg:#223326; --warn:#e0b355; --warn-bg:#3a3020; --bad-bg:#3a2522; --bad:#e08276;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1812; --surface:#242019; --surface-2:#2c271e; --fg:#ece6da; --muted:#a79c8a;
+  --border:#413a2d; --accent:#e08b3f; --accent-ink:#1b1812; --py:#6fa8dc; --rs:#e8824a; --at:#8fcf7f; --xp:#ece6da; --bib:#c49fe0; --fit:#e2846b; --habit:#7fb6c9;
+  --good:#7fc488; --good-bg:#223326; --warn:#e0b355; --warn-bg:#3a3020; --bad-bg:#3a2522; --bad:#e08276;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:1.7rem;letter-spacing:-0.01em}
+h2{font-size:1.15rem;margin-bottom:2px}
+.lede{color:var(--muted);font-size:0.95rem;margin-top:6px;max-width:60ch}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-top:18px;padding-bottom:10px;z-index:5;border-bottom:1px solid var(--border)}
+.tabs{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.tab{font-family:var(--font-mono);font-size:0.82rem;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.progress-row{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.pstat{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.pstat .n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:1.3rem;font-weight:700}
+.pstat .l{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--accent)}
+section.panel{display:none;margin-top:22px}
+section.panel.active{display:block}
+.week{margin-bottom:26px}
+.week-head{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px}
+.week h3{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin:0}
+details.day{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;margin-bottom:10px;scroll-margin-top:180px}
+details.day.review{background:var(--surface-2);border-style:dashed}
+details.day.today{border-color:var(--accent);border-width:2px}
+details.day[open]{padding-bottom:12px}
+.day summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.day summary::-webkit-details-marker{display:none}
+.day summary::marker{content:''}
+.chevron{flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s ease;margin-right:2px}
+details.day[open] .chevron{transform:rotate(45deg)}
+.day-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+.day-date{font-family:var(--font-mono);font-weight:600;font-size:0.9rem;min-width:7em}
+.day-tag{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.today-badge{font-family:var(--font-mono);font-size:0.65rem;font-weight:700;letter-spacing:0.04em;background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:1px 6px}
+.day-countdown{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:1rem;font-weight:700;color:var(--fg);background:var(--surface-2);border-radius:6px;padding:3px 9px;white-space:nowrap}
+.day-countdown.urgent{color:var(--bad);background:var(--bad-bg)}
+.day-countdown.ended{color:var(--muted);font-style:italic;font-weight:500;background:none;padding-left:0}
+.day-progress{margin-left:auto;font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:0.78rem;color:var(--muted);flex:none;display:flex;align-items:center;gap:6px}
+.day-progress .mini-bar{width:40px;height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.day-progress .mini-bar>i{display:block;height:100%;background:var(--accent)}
+.day-body{padding:0 14px 2px}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:flex-start;gap:11px;min-width:0}
+.item input{margin-top:2px;flex:none;width:19px;height:19px;accent-color:var(--accent);cursor:pointer}
+.item label{min-width:0;flex:1;cursor:pointer;padding-top:1px}
+.item.done label{color:var(--muted);text-decoration:line-through}
+.sec-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+.chip{font-family:var(--font-mono);font-size:0.68rem;padding:1px 6px;border-radius:5px;font-weight:600;flex:none;margin-top:1px}
+.chip.py{background:color-mix(in srgb, var(--py) 18%, transparent);color:var(--py)}
+.chip.rs{background:color-mix(in srgb, var(--rs) 18%, transparent);color:var(--rs)}
+.chip.at{background:color-mix(in srgb, var(--at) 18%, transparent);color:var(--at)}
+.chip.li{background:color-mix(in srgb, var(--py) 18%, transparent);color:var(--py)}
+.chip.x{background:color-mix(in srgb, var(--xp) 18%, transparent);color:var(--xp)}
+.chip.bible{background:color-mix(in srgb, var(--bib) 18%, transparent);color:var(--bib)}
+.chip.fit{background:color-mix(in srgb, var(--fit) 18%, transparent);color:var(--fit)}
+.chip.habit{background:color-mix(in srgb, var(--habit) 18%, transparent);color:var(--habit)}
+.node-id{font-family:var(--font-mono);font-size:0.78rem;color:var(--muted)}
+.review-note{font-size:0.85rem;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:0.88rem}
+th{text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border)}
+td{padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+tr.order-row td:first-child{font-family:var(--font-mono);color:var(--muted)}
+.course-title{font-weight:600}
+.status{font-family:var(--font-mono);font-size:0.68rem;padding:2px 7px;border-radius:5px;white-space:nowrap;font-weight:600}
+.status.ready{background:var(--good-bg);color:var(--good)}
+.status.half{background:var(--warn-bg);color:var(--warn)}
+.status.none{background:var(--bad-bg);color:var(--bad)}
+.callout{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin:16px 0;font-size:0.92rem}
+.callout h3{font-size:0.95rem;margin-bottom:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+@media (max-width:620px){.two-col{grid-template-columns:1fr}}
+.principle{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.principle h3{font-size:0.9rem;margin-bottom:4px}
+.principle p{font-size:0.85rem;color:var(--muted);margin:0}
+footer.note{margin-top:28px;font-size:0.8rem;color:var(--muted);border-top:1px solid var(--border);padding-top:12px}
+.table-wrap{overflow-x:auto}
+.targets-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media (max-width:620px){.targets-grid{grid-template-columns:1fr}}
+.target-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.target-card h3{font-size:0.95rem;display:flex;align-items:center;gap:7px}
+.target-card .platform-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.target-card .platform-dot.li{background:var(--py)}
+.target-card .platform-dot.x{background:var(--xp)}
+.target-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.target-row label{font-size:0.78rem;color:var(--muted)}
+.target-row input[type=number]{font-family:var(--font-mono);font-variant-numeric:tabular-nums;width:6.5em;padding:5px 7px;border-radius:7px;border:1px solid var(--border);background:var(--surface-2);color:var(--fg);font-size:0.95rem}
+.target-stats{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.target-stats .mini{min-width:70px}
+.target-stats .mini .n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:700;font-size:1.05rem}
+.target-stats .mini .l{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em}
+.growth{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+.growth-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center}
+.sprint-toolbar{display:flex;gap:8px;margin:4px 0 14px;flex-wrap:wrap}
+.toolbar-btn{font-family:var(--font-mono);font-size:0.78rem;padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--fg);cursor:pointer}
+.toolbar-btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.header-top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.header-toggle{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:999px;padding:5px 11px 5px 9px;cursor:pointer;flex:none}
+.header-toggle .chevron{transform:rotate(-45deg)}
+.header-toggle.open .chevron{transform:rotate(45deg)}
+.header-details{margin-top:10px}
+.notes-block{margin:14px 0}
+.notes-block summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.82rem;color:var(--muted);padding:9px 2px}
+.notes-block summary::-webkit-details-marker{display:none}
+.notes-block[open] summary .chevron{transform:rotate(45deg)}
+.notes-body{padding-top:4px}
+@media (max-width:480px){
+  header.top{padding-top:12px;padding-bottom:8px}
+  .header-top-row{flex-direction:column;align-items:flex-start;gap:8px}
+  .header-toggle{align-self:flex-start}
+  h1{font-size:1.32rem;line-height:1.15}
+  .progress-row{margin-top:10px;gap:10px}
+  .pstat{min-width:120px;padding:8px 10px}
+  .tabs{margin-top:10px;gap:6px}
+  .tab{padding:6px 11px;font-size:0.76rem}
+  .day-countdown{font-size:0.82rem;padding:2px 7px}
+  .wrap{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="header-top-row">
+      <h1>Bits to Reactors</h1>
+      <button class="header-toggle" id="headerToggle" aria-expanded="false" aria-controls="headerDetails">
+        <span class="chevron"></span><span class="header-toggle-label">Details</span>
+      </button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" data-tab="sprint" role="tab" aria-selected="true">Oct sprint</button>
+      <button class="tab" data-tab="masters" role="tab" aria-selected="false">Nov → Masters</button>
+      <button class="tab" data-tab="rules" role="tab" aria-selected="false">How to use this</button>
+    </div>
+    <div class="header-details" id="headerDetails" hidden>
+      <p class="lede">Three tracks, one October: low-level Python (14/26 done), low-level Rust (0/34) and algo-trading in Rust+Python (0/28) — 74 nodes left, all three mastered by Oct 31 — plus a daily LinkedIn (3,477 → 5,000) and X (214 → 500) push, a daily chapter of John, Philippians and James finishing all three complete by Oct 31, a daily workout (50 push-ups plus a rotating walk, strength or recovery set), and three daily habits: lights out by 10:30pm, Duolingo, and a GitHub commit for the streak. The Masters track lines up behind them starting in November.</p>
+      <div class="progress-row" id="progressRow"></div>
+    </div>
+  </header>
+
+  <section class="panel active" id="panel-sprint">
+    <div class="targets-grid" id="targetsGrid"></div>
+    <details class="notes-block">
+      <summary><span class="chevron"></span>Notes &amp; reality checks</summary>
+      <div class="notes-body">
+        <div class="callout" id="liRealityCheck"></div>
+        <div class="callout">
+          <h3>Three books, fully read, instead of scattered chapters</h3>
+          <p>John (21 chapters), Philippians (4) and James (5) — 30 chapters total, averaging about 1.25/day with a few 2-chapter days to keep slack. All three finish complete by Oct 31 rather than leaving a wide, shallow pass across the whole Bible that covers more ground but finishes nothing. John for the gospel narrative, then two short, practical epistles to close the month.</p>
+        </div>
+        <div class="callout">
+          <h3>50 push-ups every day, the rest rotates</h3>
+          <p>Push-ups are the one constant. Alongside them: a brisk walk on Mon/Wed/Fri-pattern days, squats and plank on the alternating strength days, and a lighter stretch-and-walk recovery set on the three review Sundays — the same logic as the learning review days, just for the body instead of the courses.</p>
+        </div>
+        <div class="callout">
+          <h3>This is a genuinely intense pace</h3>
+          <p>74 learning nodes in 21 active study days averages 3.5/day, peaking at 4, on top of LinkedIn, X, scripture, a workout and three habit checks on every card below. If each node runs 25–40 minutes, that's 1.5–2.5 hours of focused study most days before any of the rest. It's load-balanced across all three courses so none sits untouched for a week, but it has no slack built in — fall a day behind and the next day absorbs it. If that turns out to be too much, the honest fix is dropping one track's end date into November, not silently skipping nodes. Sleep by 10:30pm is actually load-bearing here, not just a habit to tick: a 3.5-node, six-growth-task, workout-and-reading day doesn't work on a sleep deficit.</p>
+        </div>
+      </div>
+    </details>
+    <div class="sprint-toolbar" id="sprintToolbar"></div>
+    <div id="sprintDays"></div>
+  </section>
+
+  <section class="panel" id="panel-masters">
+    <h2>November onward — the Nuclear MPhil prep track</h2>
+    <p class="lede">Strict order, unlike the sprint. Course 2 extends course 1's own results, course 5 reuses course 1 and 2's machinery, and the capstones chain all the way to Reactor Physics — skipping ahead means hitting a cross-reference to a tool you never built.</p>
+    <div class="callout">
+      <h3>Start with Calculus, even though it isn't numbered</h3>
+      <p>It's not one of the 14 NE-track courses, but it's the explicitly-declared prerequisite for Linear Algebra onward (31 nodes, 0 done). Clear it first, in November, before Course 1.</p>
+    </div>
+    <div class="table-wrap">
+      <table id="mastersTable"></table>
+    </div>
+    <div class="callout">
+      <h3>Pacing once you're in it</h3>
+      <p>These nodes are paper-and-pencil proofs, not code quests — budget more per node than the low-level courses. Aim for <b>4–5 nodes a week</b> (roughly one on most weekdays, weekends free or catch-up), not one a day every day. At that rate Calculus + Courses 1–8 (271 nodes, everything already built) run about a year. That's fine — this track was never meant to race the October sprint.</p>
+    </div>
+    <div class="callout">
+      <h3>Courses 9–14 are still being built</h3>
+      <p>Nuclear Thermal-Hydraulics (course 9) is about half-baked right now; Nuclear Materials, Fuel Cycle/Waste, Nuclear Safety, Computational Reactor Modelling and Advanced Fission &amp; Fusion (10–14) don't exist yet. At 4–5 nodes/week you won't reach course 9 for months — by then it should be finished. Ask me to pick building back up whenever you want the runway kept ahead of you.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-rules">
+    <h2>Why this shape</h2>
+    <div class="two-col">
+      <div class="principle"><h3>Interchange freely in the sprint</h3><p>Python, Rust and algo-trading are three independent courses — algo-trading only assumes you can already read both languages, not that you've finished either low-level course. Swap which one you do on a given day, bank two algo-trading nodes and skip a day, whatever — the weekly total is what matters, not the day-by-day order.</p></div>
+      <div class="principle"><h3>Don't interchange the Masters track</h3><p>It's one long derivation chain: la-capstone's toy k=1.5 gets a real answer from Reactor Physics eight courses later. Reordering it isn't variety, it's working ahead of tools you haven't built yet.</p></div>
+      <div class="principle"><h3>Review days aren't rest days</h3><p>Three Sundays in the sprint carry no new nodes — reopen the dragon/owl on anything shaky, redo a missed quiz, or just reread a node you rushed. Complacency creeps in on the 1-new-topic-a-day treadmill, not on a harder day.</p></div>
+      <div class="principle"><h3>The daily count is already balanced</h3><p>74 nodes across three tracks in 21 active days works out to 2–4 a day, weighted by how many nodes each track still has left so all three land on Oct 31 together. If a day runs long, push the extra node to the next day rather than cramming — the allocation has no spare days to recover one, so slipping costs you later, not nothing.</p></div>
+      <div class="principle"><h3>Growth tasks run every day, including review Sundays</h3><p>Learning nodes pause on review days; LinkedIn and X don't — an audience doesn't wait for your study schedule. The six daily growth tasks (connect, engage, clear invites on LinkedIn; post, follow, reply on X) are the same template all 24 days, separate from the course checklist, so you can tell at a glance what's "new learning" versus "keep the pipeline moving."</p></div>
+      <div class="principle"><h3>LinkedIn's target is the one that may not close by Oct 31</h3><p>1,523 connections in 24 days needs ~63 net accepted a day. Safe sending volume (~15/day to avoid platform restrictions) at a realistic accept rate gets you a fraction of that — see the reality check on the sprint tab. Keep sending at a sustainable pace and let it run into November rather than spiking volume to chase the date; a restricted account sets you back further than a missed deadline does.</p></div>
+      <div class="principle"><h3>Scripture is paced to finish three books, not sample thirty</h3><p>30 chapters across John, Philippians and James at roughly 1.25/day, with the 2-chapter days absorbing slack so none of the three is left half-read on Nov 1. Breadth across the whole Bible this month would have meant finishing nothing — depth on three books, chosen deliberately, was the actual ask.</p></div>
+      <div class="principle"><h3>Push-ups are the constant, everything else rotates</h3><p>50 push-ups is non-negotiable every day. The second slot varies — walk, squats-and-plank, or a lighter recovery set on review Sundays — for the same reason the learning tracks alternate: the same movement every single day gets skipped first when a day is tight, a rotating one holds attention.</p></div>
+      <div class="principle"><h3>The three habits are the floor, not the ceiling</h3><p>Sleep, Duolingo and a GitHub commit are small and fast on purpose — they're what keeps the streaks alive and the rest of the day functional, not goals to optimize. Checking them off should take under five minutes combined most days; if any one of them starts taking longer, that's worth noticing on a review Sunday.</p></div>
+    </div>
+  </section>
+
+  <footer class="note">Checkboxes, the LinkedIn/X counts and everything else you check off all save locally in this browser only — they won't sync with the app's own progress.json, LinkedIn, X, GitHub, Duolingo or a Bible app, or follow you to another device.</footer>
+</div>
+
+<script>
+(function(){
+  try{
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
+        t.setAttribute('aria-selected','true');
+        document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+        document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+      });
+    });
+  }catch(e){}
+
+  try{
+    var HEADER_KEY = 'b2r_header_open';
+    var headerBtn = document.getElementById('headerToggle');
+    var headerDetails = document.getElementById('headerDetails');
+    var headerOpen = localStorage.getItem(HEADER_KEY) === '1';
+    function setHeaderOpen(open){
+      headerOpen = open;
+      headerDetails.hidden = !open;
+      headerBtn.classList.toggle('open', open);
+      headerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      try{ localStorage.setItem(HEADER_KEY, open ? '1' : '0'); }catch(e){}
+    }
+    setHeaderOpen(headerOpen);
+    headerBtn.addEventListener('click', function(){ setHeaderOpen(!headerOpen); });
+  }catch(e){}
+
+  // ---- data ----
+  function it(lang,id,label){ return {lang:lang,id:id,label:label}; }
+
+  var days = [
+    {date:'Thu, Oct 8', type:'study', items:[ it('rs','lr-binary','Bits, Bytes and Rust’s Fixed-Width Integers'), it('at','at-intro','The Trading Loop') ]},
+    {date:'Fri, Oct 9', type:'study', items:[ it('py','llo-process','Processes, PIDs & Exit Codes'), it('rs','lr-signed','Signed Integers and Two’s Complement'), it('rs','lr-bitwise','Bitwise Operations and the Tricks Worth Knowing'), it('at','at-data','Market Data') ]},
+    {date:'Sat, Oct 10', type:'study', items:[ it('rs','lr-bytes','Bytes, Endianness and Text'), it('at','at-boss-foundations','Boss: The Market Model'), it('at','at-returns','Returns and Log Returns') ]},
+    {date:'Sun, Oct 11', type:'review', note:'Rust’s Foundry of Bits and algo-trading’s Landfall region so far, plus whichever Python Kernel Gate node you’re mid-way through. Replay any quiz under 100%.'},
+    {date:'Mon, Oct 12', type:'study', items:[ it('py','llo-fd','File Descriptors & I/O'), it('rs','lr-boss-bits','Boss: Decode a Binary Frame End to End'), it('rs','lr-values','Values, Moves and Copies'), it('at','at-moving-averages','Moving Averages') ]},
+    {date:'Tue, Oct 13', type:'study', items:[ it('rs','lr-stackheap','The Stack and the Heap'), it('rs','lr-layout','Struct Layout: Size, Alignment and Padding'), it('at','at-indicators','Technical Indicators') ]},
+    {date:'Wed, Oct 14', type:'study', items:[ it('py','llo-syscall','System Calls & the Kernel Boundary'), it('rs','lr-slices','Slices, Fat Pointers and Bounds Checks'), it('at','at-boss-indicators','Boss: The Signal Forge'), it('at','at-review-1','Review: Data and Indicators') ]},
+    {date:'Thu, Oct 15', type:'study', items:[ it('py','llc-threads','Threads, Races & Locks'), it('rs','lr-review-1','Review: From Bits to Memory'), it('rs','lr-refs','References, Aliasing and What the Borrow Checker Buys'), it('at','at-signals','Signals and Crossovers') ]},
+    {date:'Fri, Oct 16', type:'study', items:[ it('rs','lr-rawptr','Raw Pointers and `unsafe`'), it('rs','lr-uninit','Uninitialised Memory, `MaybeUninit` and `transmute`'), it('at','at-position','Positions and Sizing') ]},
+    {date:'Sat, Oct 17', type:'study', items:[ it('py','llc-gil','The GIL: Why Python Threads Don’t Parallelize CPU'), it('rs','lr-boss-alloc','Boss: Build a Bump Allocator'), it('at','at-boss-strategy','Boss: The Rulebook'), it('at','at-backtest','The Backtest Engine') ]},
+    {date:'Sun, Oct 18', type:'review', note:'Rust’s unsafe/raw-pointer region and algo-trading’s Strategy Strait. This is where Rust’s memory model and Python’s backtest discipline both get harder — worth sitting with rather than rushing past.'},
+    {date:'Mon, Oct 19', type:'study', items:[ it('rs','lr-compile','From Source to Machine Code'), it('rs','lr-asm','Reading Assembly and the Calling Convention'), it('at','at-pnl','P&L and the Equity Curve') ]},
+    {date:'Tue, Oct 20', type:'study', items:[ it('py','llc-proc','Processes for Parallelism & IPC'), it('rs','lr-optimizer','What the Optimiser Does, and What Stops It'), it('rs','lr-review-2','Review: Pointers and the Machine'), it('at','at-boss-backtest','Boss: The Time Machine') ]},
+    {date:'Wed, Oct 21', type:'study', items:[ it('py','lln-stack','The Network Stack & TCP/IP'), it('rs','lr-vec','Building a Growable Array'), it('at','at-review-2','Review: Strategy and Backtest'), it('at','at-metrics','Performance Metrics') ]},
+    {date:'Thu, Oct 22', type:'study', items:[ it('rs','lr-hash','Hash Tables from Scratch'), it('rs','lr-linked','Linked Structures and Pointer Chasing'), it('at','at-risk','Risk Management') ]},
+    {date:'Fri, Oct 23', type:'study', items:[ it('py','lln-socket','Sockets & Byte Streams'), it('rs','lr-boss-ds','Boss: Build a String Interner'), it('at','at-boss-risk','Boss: The Survival Test') ]},
+    {date:'Sat, Oct 24', type:'study', items:[ it('rs','lr-process','Processes, Exit Codes and Pipes'), it('rs','lr-fd','File Descriptors and Buffered I/O'), it('at','at-orders','Orders and the Order Book'), it('at','at-slippage','Slippage, Fees, and Impact') ]},
+    {date:'Sun, Oct 25', type:'review', note:'The compile-to-machine-code pipeline and risk/execution mechanics. Re-derive one thing from scratch without looking — the bump allocator or the Sharpe/drawdown calc, your call.'},
+    {date:'Mon, Oct 26', type:'study', items:[ it('py','lln-protocol','Designing a Binary Protocol (Framing)'), it('rs','lr-syscall','The Syscall Boundary'), it('rs','lr-review-3','Review: Structures and the Kernel'), it('at','at-boss-execution','Boss: The Matching Engine') ]},
+    {date:'Tue, Oct 27', type:'study', items:[ it('py','llp-cache','The Memory Hierarchy & Cache Locality'), it('rs','lr-threads','Threads, `Send` and `Sync`'), it('at','at-review-3','Review: Risk and Execution'), it('at','at-portfolio','Portfolios and Correlation') ]},
+    {date:'Wed, Oct 28', type:'study', items:[ it('rs','lr-atomics','Atomics and Memory Ordering'), it('rs','lr-channels','Channels and Message Passing'), it('at','at-optimization','Optimization and Overfitting') ]},
+    {date:'Thu, Oct 29', type:'study', items:[ it('py','llp-bigo','Big-O in the Real World'), it('rs','lr-boss-conc','Boss: A Parallel Decoder'), it('rs','lr-sockets','Sockets and Byte Streams'), it('at','at-boss-portfolio','Boss: The Allocator') ]},
+    {date:'Fri, Oct 30', type:'study', items:[ it('rs','lr-protocol','Designing a Binary Protocol'), it('at','at-pitfalls','The Backtesting Pitfalls'), it('at','at-live','From Backtest to Live') ]},
+    {date:'Sat, Oct 31', type:'study', items:[ it('py','llp-capstone','Capstone: A Length-Prefixed Message Protocol — all three tracks complete'), it('rs','lr-cache','The Memory Hierarchy and Cache Locality'), it('rs','lr-capstone','Capstone: Bytes to Answer'), it('at','at-capstone','Capstone: A Complete Strategy System') ]}
+  ];
+
+  var totalNodes = 0;
+  days.forEach(function(d){ if(d.items) totalNodes += d.items.length; });
+
+  // ---- daily Bible reading: John, then Philippians, then James — all three finished, not partial ----
+  var bibleReading = [
+    'John 1', 'John 2', 'John 3', 'John 4–5', 'John 6', 'John 7', 'John 8', 'John 9–10',
+    'John 11', 'John 12', 'John 13', 'John 14–15', 'John 16', 'John 17', 'John 18–19', 'John 20', 'John 21',
+    'Philippians 1', 'Philippians 2–3', 'Philippians 4', 'James 1', 'James 2', 'James 3–4', 'James 5'
+  ];
+  var BIBLE_TOTAL = 30; // chapters: John 21 + Philippians 4 + James 5
+
+  // ---- daily workout: 50 push-ups every day, rotating with walks/strength, recovery on review Sundays ----
+  var workoutType = [
+    'squat','walk','squat','recovery','walk','squat','walk',
+    'squat','walk','squat','recovery','walk','squat','walk',
+    'squat','walk','squat','recovery','walk','squat','walk',
+    'squat','walk','squat'
+  ];
+  var workoutExtra = {
+    walk: 'A 20–25 minute brisk walk',
+    squat: '3×15 bodyweight squats + 3×30–45s plank',
+    recovery: '10 minutes of stretching + a short easy walk'
+  };
+
+  // ---- daily habits: same three every day, no rotation ----
+  var HABITS = [
+    {key:'sleep', label:'Lights out by 10:30pm'},
+    {key:'duo', label:'Duolingo practice (keep the streak)'},
+    {key:'gh', label:'Push a commit to GitHub (keep the streak)'}
+  ];
+
+  var STORE_KEY = 'b2r_checked_v2';
+  function loadChecked(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }catch(e){ return {}; } }
+  function saveChecked(obj){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(obj)); }catch(e){} }
+  var checked = loadChecked();
+
+  // ---- daily growth tasks (same template every day, including review days) ----
+  function growthTasks(dayKey){
+    return [
+      {platform:'li', id:'li-connect-'+dayKey, label:'Send 15 personalized connection requests'},
+      {platform:'li', id:'li-engage-'+dayKey, label:'Comment thoughtfully on 5 posts in your network'},
+      {platform:'li', id:'li-accept-'+dayKey, label:'Clear your pending invite inbox'},
+      {platform:'x', id:'x-post-'+dayKey, label:'Publish 2 original posts'},
+      {platform:'x', id:'x-follow-'+dayKey, label:'Follow 20 accounts in your niche'},
+      {platform:'x', id:'x-reply-'+dayKey, label:'Reply to 8 posts from larger accounts in-niche'}
+    ];
+  }
+
+  // ---- growth targets (LinkedIn connections, X followers) ----
+  var TARGET_STORE = 'b2r_targets_v1';
+  function loadTargets(){
+    try{ return Object.assign({li:3477, x:214}, JSON.parse(localStorage.getItem(TARGET_STORE)||'{}')); }
+    catch(e){ return {li:3477, x:214}; }
+  }
+  function saveTargets(t){ try{ localStorage.setItem(TARGET_STORE, JSON.stringify(t)); }catch(e){} }
+  var targets = loadTargets();
+  var GOALS = {li:{label:'LinkedIn connections', target:5000, dotClass:'li'}, x:{label:'X followers', target:500, dotClass:'x'}};
+
+  function daysLeftToOct31(){
+    var cutoff = new Date(2026,9,31,23,59,59);
+    var now = new Date();
+    var ms = cutoff - now;
+    return Math.max(0, Math.ceil(ms/86400000));
+  }
+
+  function renderTargets(){
+    var daysLeft = daysLeftToOct31();
+    var html = '';
+    ['li','x'].forEach(function(k){
+      var g = GOALS[k];
+      var current = targets[k];
+      var gap = Math.max(0, g.target - current);
+      var perDay = daysLeft ? (gap/daysLeft) : gap;
+      html += '<div class="target-card">' +
+        '<h3><span class="platform-dot '+g.dotClass+'"></span>'+g.label+'</h3>' +
+        '<div class="target-row"><label for="input-'+k+'">Current count</label>' +
+        '<input type="number" id="input-'+k+'" min="0" value="'+current+'"></div>' +
+        '<div class="target-stats">' +
+          '<div class="mini"><div class="n">'+g.target+'</div><div class="l">Target</div></div>' +
+          '<div class="mini"><div class="n">'+gap+'</div><div class="l">Gap left</div></div>' +
+          '<div class="mini"><div class="n">'+perDay.toFixed(1)+'</div><div class="l">Net/day needed</div></div>' +
+        '</div></div>';
+    });
+    document.getElementById('targetsGrid').innerHTML = html;
+    ['li','x'].forEach(function(k){
+      document.getElementById('input-'+k).addEventListener('input', function(e){
+        var v = parseInt(e.target.value,10);
+        targets[k] = isNaN(v) ? 0 : v;
+        saveTargets(targets);
+        renderTargets();
+      });
+    });
+    var liGap = Math.max(0, GOALS.li.target - targets.li);
+    var liNeeded = daysLeft ? liGap/daysLeft : liGap;
+    var sendPerDay = 15, assumedAccept = 0.3;
+    var projectedNet = sendPerDay*assumedAccept;
+    document.getElementById('liRealityCheck').innerHTML =
+      '<h3>LinkedIn reality check</h3>' +
+      '<p>Closing the gap by Oct 31 needs about <b>'+liNeeded.toFixed(0)+' accepted connections a day</b>. ' +
+      'Sending the safe daily volume above (~15/day) at a generous 30% accept rate nets roughly <b>'+projectedNet.toFixed(1)+'/day</b> from requests alone — the rest has to come from inbound requests your own posts and comments generate, not from sending more invites (which risks a platform restriction well before it closes a 1000+ gap). Treat Oct 31 as a checkpoint for this one, not a hard deadline.</p>';
+  }
+
+  function renderProgress(){
+    var done = 0, byLang = {py:0,rs:0,at:0};
+    days.forEach(function(d){ (d.items||[]).forEach(function(it){ if(checked[it.id]){ done++; byLang[it.lang]++; } }); });
+    var pct = totalNodes ? Math.round(done/totalNodes*100) : 0;
+    var bibleDone = 0, pushDone = 0, habitsDone = 0;
+    for(var bi=0; bi<24; bi++){
+      if(checked['bible-d'+bi]) bibleDone++;
+      if(checked['fit-push-d'+bi]) pushDone++;
+      HABITS.forEach(function(h){ if(checked['habit-'+h.key+'-d'+bi]) habitsDone++; });
+    }
+    document.getElementById('progressRow').innerHTML =
+      '<div class="pstat"><div class="n">'+done+'/'+totalNodes+'</div><div class="l">Sprint nodes checked off</div><div class="bar"><i style="width:'+pct+'%"></i></div></div>' +
+      '<div class="pstat"><div class="n">'+(byLang.py+14)+'/26 · '+byLang.rs+'/34 · '+byLang.at+'/28</div><div class="l">Python · Rust · Algo-trading</div></div>' +
+      '<div class="pstat"><div class="n">'+bibleDone+'/'+BIBLE_TOTAL+'</div><div class="l">Chapters read (John, Phil, James)</div></div>' +
+      '<div class="pstat"><div class="n">'+pushDone+'/24 × 50</div><div class="l">Push-up days done</div></div>' +
+      '<div class="pstat"><div class="n">'+habitsDone+'/'+(24*HABITS.length)+'</div><div class="l">Sleep · Duolingo · GitHub kept</div></div>' +
+      '<div class="pstat"><div class="n">Oct 31</div><div class="l">Target: everything done</div></div>';
+  }
+
+  var sprintEl = document.getElementById('sprintDays');
+  var weeks = [
+    {label:'Week 1 — Oct 8–11', range:[0,4]},
+    {label:'Week 2 — Oct 12–18', range:[4,11]},
+    {label:'Week 3 — Oct 19–25', range:[11,18]},
+    {label:'Week 4 — Oct 26–31 (all three close out)', range:[18,24]}
+  ];
+
+  function dateForIndex(i){ return new Date(2026,9,8+i); }
+  function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  var now = new Date();
+  var todayIdx = -1;
+  for(var ti=0; ti<24; ti++){ if(sameDay(dateForIndex(ti), now)){ todayIdx = ti; break; } }
+
+  // itemIds[i] = every checkbox id that belongs to day i, for the per-day progress badge
+  var itemIds = [];
+  for(var pi=0; pi<24; pi++) itemIds.push([]);
+
+  function addItem(container, id, chipClass, chipText, labelHtml, dayIndex, extraCb){
+    itemIds[dayIndex].push(id);
+    var row = document.createElement('div'); row.className='item'+(checked[id]?' done':'');
+    var cb = document.createElement('input'); cb.type='checkbox'; cb.id='chk-'+id; cb.checked = !!checked[id];
+    cb.addEventListener('change', function(){
+      checked[id] = cb.checked;
+      row.classList.toggle('done', cb.checked);
+      saveChecked(checked);
+      renderProgress();
+      updateDayBadge(dayIndex);
+      if(extraCb) extraCb();
+    });
+    var label = document.createElement('label'); label.setAttribute('for','chk-'+id);
+    label.innerHTML = (chipClass ? '<span class="chip '+chipClass+'">'+chipText+'</span> ' : '') + labelHtml;
+    row.appendChild(cb); row.appendChild(label);
+    container.appendChild(row);
+    return row;
+  }
+
+  function section(card, dotColorVar, title){
+    var wrap = document.createElement('div'); wrap.className='growth';
+    var label = document.createElement('div'); label.className='growth-label';
+    label.innerHTML = '<span class="sec-dot" style="background:'+dotColorVar+'"></span>'+title;
+    wrap.appendChild(label);
+    var list = document.createElement('div'); list.className='items';
+    wrap.appendChild(list);
+    card.appendChild(wrap);
+    return list;
+  }
+
+  var dayBadgeEls = [];
+  function updateDayBadge(i){
+    var el = dayBadgeEls[i];
+    if(!el) return;
+    var ids = itemIds[i], done = 0;
+    ids.forEach(function(id){ if(checked[id]) done++; });
+    var pct = ids.length ? Math.round(done/ids.length*100) : 0;
+    el.querySelector('.count').textContent = done+'/'+ids.length;
+    el.querySelector('.mini-bar > i').style.width = pct+'%';
+  }
+
+  weeks.forEach(function(w){
+    var wrap = document.createElement('div'); wrap.className='week';
+    var wh = document.createElement('div'); wh.className='week-head';
+    var h = document.createElement('h3'); h.textContent = w.label; wh.appendChild(h);
+    wrap.appendChild(wh);
+    for(var i=w.range[0]; i<w.range[1]; i++){
+      (function(i){
+      var d = days[i];
+      var isToday = i === todayIdx;
+      var card = document.createElement('details');
+      card.className = 'day'+(d.type==='review'?' review':'')+(isToday?' today':'');
+      if(isToday) card.open = true;
+      card.id = 'day-'+i;
+
+      var summary = document.createElement('summary');
+      var chev = document.createElement('span'); chev.className='chevron'; summary.appendChild(chev);
+      var head = document.createElement('div'); head.className='day-head';
+      head.innerHTML = '<span class="day-date">'+d.date+'</span>' +
+        (isToday ? '<span class="today-badge">TODAY</span>' : '') +
+        '<span class="day-tag">'+(d.type==='review'?'Review — no new nodes':'Study day')+'</span>' +
+        '<span class="day-countdown" id="countdown-'+i+'"></span>';
+      summary.appendChild(head);
+      var badge = document.createElement('div'); badge.className='day-progress';
+      badge.innerHTML = '<span class="count">0/0</span><span class="mini-bar"><i style="width:0%"></i></span>';
+      summary.appendChild(badge);
+      dayBadgeEls[i] = badge;
+      card.appendChild(summary);
+
+      var body = document.createElement('div'); body.className='day-body';
+
+      if(d.type==='review'){
+        var note = document.createElement('div'); note.className='review-note'; note.textContent = d.note; body.appendChild(note);
+      } else {
+        var list = section(body, 'var(--muted)', 'Learning');
+        list.parentElement.querySelector('.growth-label .sec-dot').remove();
+        d.items.forEach(function(it){
+          var chipText = {py:'PY',rs:'RS',at:'AT'}[it.lang];
+          addItem(list, it.id, it.lang, chipText, it.label+' <span class="node-id">'+it.id+'</span>', i);
+        });
+      }
+
+      // LinkedIn
+      var liList = section(body, 'var(--py)', 'LinkedIn');
+      growthTasks('d'+i).filter(function(gt){ return gt.platform==='li'; }).forEach(function(gt){
+        addItem(liList, gt.id, 'li', 'LI', gt.label, i);
+      });
+
+      // X
+      var xList = section(body, 'var(--xp)', 'X');
+      growthTasks('d'+i).filter(function(gt){ return gt.platform==='x'; }).forEach(function(gt){
+        addItem(xList, gt.id, 'x', 'X', gt.label, i);
+      });
+
+      // Scripture
+      var sList = section(body, 'var(--bib)', 'Scripture');
+      addItem(sList, 'bible-d'+i, 'bible', 'READ', bibleReading[i], i);
+
+      // Workout
+      var fList = section(body, 'var(--fit)', 'Workout');
+      var ftype = workoutType[i];
+      addItem(fList, 'fit-push-d'+i, 'fit', 'FIT', '50 push-ups (break into sets, e.g. 5×10)', i);
+      addItem(fList, 'fit-extra-d'+i, 'fit', 'FIT', workoutExtra[ftype], i);
+
+      // Daily habits
+      var hList = section(body, 'var(--habit)', 'Daily habits');
+      HABITS.forEach(function(h){
+        addItem(hList, 'habit-'+h.key+'-d'+i, 'habit', 'HABIT', h.label, i);
+      });
+
+      card.appendChild(body);
+      wrap.appendChild(card);
+      updateDayBadge(i);
+      })(i);
+    }
+    sprintEl.appendChild(wrap);
+  });
+  renderProgress();
+  renderTargets();
+
+  // ---- live countdown to each day's 10:30pm lights-out ----
+  (function(){
+    function pad(n){ return (n<10?'0':'')+n; }
+    function deadlineForIndex(i){ return new Date(2026,9,8+i,22,30,0); }
+    function tick(){
+      var now = new Date();
+      for(var i=0; i<24; i++){
+        var el = document.getElementById('countdown-'+i);
+        if(!el) continue;
+        var ms = deadlineForIndex(i) - now;
+        if(ms <= 0){
+          el.textContent = 'Lights out passed';
+          el.className = 'day-countdown ended';
+          continue;
+        }
+        var totalSec = Math.floor(ms/1000);
+        var dLeft = Math.floor(totalSec/86400);
+        if(dLeft >= 1){
+          var hLeft = Math.floor((totalSec%86400)/3600);
+          el.textContent = dLeft+'d '+hLeft+'h to 10:30pm';
+          el.className = 'day-countdown';
+        } else {
+          var h = Math.floor(totalSec/3600), m = Math.floor((totalSec%3600)/60), s = totalSec%60;
+          el.textContent = pad(h)+':'+pad(m)+':'+pad(s)+' to 10:30pm';
+          el.className = 'day-countdown'+(ms < 3600000 ? ' urgent' : '');
+        }
+      }
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
+  // ---- toolbar: jump to today, expand/collapse all ----
+  (function(){
+    var tb = document.getElementById('sprintToolbar');
+    var btns = [];
+    if(todayIdx >= 0){
+      var jump = document.createElement('button'); jump.className='toolbar-btn primary'; jump.textContent='Jump to today';
+      jump.addEventListener('click', function(){
+        var el = document.getElementById('day-'+todayIdx);
+        if(el){ el.open = true; el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+      btns.push(jump);
+    }
+    var expand = document.createElement('button'); expand.className='toolbar-btn'; expand.textContent='Expand all';
+    expand.addEventListener('click', function(){ document.querySelectorAll('details.day').forEach(function(el){ el.open = true; }); });
+    var collapse = document.createElement('button'); collapse.className='toolbar-btn'; collapse.textContent='Collapse all';
+    collapse.addEventListener('click', function(){ document.querySelectorAll('details.day').forEach(function(el){ el.open = false; }); });
+    btns.push(expand, collapse);
+    btns.forEach(function(b){ tb.appendChild(b); });
+  })();
+
+  if(todayIdx >= 0){
+    setTimeout(function(){
+      var el = document.getElementById('day-'+todayIdx);
+      if(el) el.scrollIntoView({block:'start'});
+    }, 0);
+  }
+
+  // ---- masters table ----
+  var masters = [
+    {n:'0', name:'Calculus', note:'prerequisite, not part of the 14', nodes:31, status:'ready'},
+    {n:'1', name:'Linear Algebra for Engineers', note:'Tier A', nodes:28, status:'ready'},
+    {n:'2', name:'Differential Equations & PDEs for Engineers', note:'Tier A', nodes:32, status:'ready'},
+    {n:'3', name:'Probability & Statistics for Engineers', note:'Tier A', nodes:30, status:'ready'},
+    {n:'4', name:'Numerical Methods & Monte Carlo for Engineers', note:'Tier A', nodes:30, status:'ready'},
+    {n:'5', name:'Nuclear & Particle Physics Fundamentals', note:'Tier B', nodes:30, status:'ready'},
+    {n:'6', name:'Thermodynamics & Heat Transfer for Engineers', note:'Tier B', nodes:30, status:'ready'},
+    {n:'7', name:'Fluid Mechanics for Engineers', note:'Tier B', nodes:30, status:'ready'},
+    {n:'8', name:'Reactor Physics (NE1)', note:'Tier C', nodes:30, status:'ready'},
+    {n:'9', name:'Nuclear Reactor Thermal-Hydraulics (NE2)', note:'Tier C — being built now', nodes:30, status:'half'},
+    {n:'10', name:'Nuclear Materials & Radiation Damage (NE3)', note:'Tier C', nodes:'—', status:'none'},
+    {n:'11', name:'Nuclear Fuel Cycle, Waste & Decommissioning (NE4)', note:'Tier C', nodes:'—', status:'none'},
+    {n:'12', name:'Nuclear Safety Principles & Risk Engineering (NE5)', note:'Tier C', nodes:'—', status:'none'},
+    {n:'13', name:'Computational Reactor Modelling (NE8)', note:'Tier C', nodes:'—', status:'none'},
+    {n:'14', name:'Advanced Fission & Fusion Reactor Systems (NE9)', note:'Tier C', nodes:'—', status:'none'}
+  ];
+  var statusLabel = {ready:'Ready', half:'In progress', none:'Not built'};
+  var rows = '<tr><th>#</th><th>Course</th><th>Tier</th><th>Nodes</th><th>Status</th></tr>';
+  masters.forEach(function(m){
+    rows += '<tr class="order-row"><td>'+m.n+'</td><td class="course-title">'+m.name+'</td><td>'+m.note+'</td><td>'+m.nodes+'</td><td><span class="status '+m.status+'">'+statusLabel[m.status]+'</span></td></tr>';
+  });
+  document.getElementById('mastersTable').innerHTML = rows;
+})();
+</script>
+</body>
+</html>
