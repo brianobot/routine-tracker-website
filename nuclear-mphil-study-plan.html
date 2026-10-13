@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4-Month Study Plan — Nuclear MPhil Prep</title>
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --panel: #ffffff;
+    --ink: #22201c;
+    --ink-soft: #5b5650;
+    --line: #e4ddd0;
+    --accent: #8a5a2e;
+    --accent-ink: #ffffff;
+    --tier0: #6b7a4d;
+    --tierA: #4d7c6f;
+    --tierB: #a05a2c;
+    --tierC: #6b4c8a;
+    --warn: #b23b3b;
+    --warn-bg: #fbeceb;
+    --chip-bg: #f0ebe1;
+    --done: #3f7d52;
+    --shadow: 0 1px 2px rgba(30,25,15,0.06), 0 4px 14px rgba(30,25,15,0.06);
+    --radius: 14px;
+    font-size: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171512;
+      --panel: #211e1a;
+      --ink: #eee9e0;
+      --ink-soft: #b3aca0;
+      --line: #3a352c;
+      --accent: #d99a56;
+      --accent-ink: #171512;
+      --tier0: #a3b57e;
+      --tierA: #7fb8a7;
+      --tierB: #e0a067;
+      --tierC: #b99bd9;
+      --warn: #e08080;
+      --warn-bg: #3a2222;
+      --chip-bg: #2a261f;
+      --done: #7fc993;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 18px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171512; --panel: #211e1a; --ink: #eee9e0; --ink-soft: #b3aca0;
+    --line: #3a352c; --accent: #d99a56; --accent-ink: #171512;
+    --tier0: #a3b57e; --tierA: #7fb8a7; --tierB: #e0a067; --tierC: #b99bd9;
+    --warn: #e08080; --warn-bg: #3a2222; --chip-bg: #2a261f; --done: #7fc993;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 18px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    padding: 0 16px 64px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header.hero {
+    padding: 40px 0 20px;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12.5px;
+    color: var(--accent);
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 5vw, 34px);
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 640px;
+    margin: 0 0 22px;
+  }
+
+  .progress-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .progress-track {
+    flex: 1 1 220px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--chip-bg);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--done);
+    transition: width 0.25s ease;
+  }
+  .progress-label { font-size: 14px; color: var(--ink-soft); white-space: nowrap; }
+  .progress-label strong { color: var(--ink); }
+
+  section.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 22px 6px;
+    margin: 22px 0;
+  }
+  section.panel h2 {
+    font-size: 19px;
+    margin: 0 0 6px;
+  }
+  section.panel p { color: var(--ink-soft); font-size: 14.5px; }
+  .note-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin: 14px 0 20px;
+  }
+  .note-card {
+    background: var(--chip-bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .note-card .k { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); margin: 0 0 4px; }
+  .note-card .v { font-size: 15px; font-weight: 600; }
+
+  .tier-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 36px 0 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tier-head h2 { margin: 0; font-size: 20px; }
+  .tier-head .tier-meta { color: var(--ink-soft); font-size: 13.5px; }
+  .tier-rule { height: 3px; border-radius: 3px; margin: 0 0 16px; }
+  .tier0 .tier-rule { background: var(--tier0); }
+  .tierA .tier-rule { background: var(--tierA); }
+  .tierB .tier-rule { background: var(--tierB); }
+  .tierC .tier-rule { background: var(--tierC); }
+
+  .course {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 4px 14px;
+    align-items: start;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .course.done { opacity: 0.6; }
+  .course.done .title { text-decoration: line-through; }
+  .check {
+    grid-row: 1 / 3;
+    width: 26px;
+    height: 26px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--done);
+  }
+  .course .dates {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .course .title {
+    font-size: 16px;
+    font-weight: 650;
+    margin: 2px 0 4px;
+  }
+  .course .meta {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+  .course .scope {
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: right;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .flag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12.5px;
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-radius: 7px;
+    padding: 4px 9px;
+    font-weight: 600;
+  }
+
+  footer {
+    margin-top: 40px;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  footer p { margin: 0 0 8px; }
+  code {
+    background: var(--chip-bg);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.92em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Doctrina Universi &middot; study plan</p>
+    <h1>Math &amp; Nuclear MPhil Prep</h1>
+    <p class="sub">
+      All 16 math/masters courses, in the order the roadmap was designed around, from
+      <strong>Monday 2 Nov 2026</strong> to <strong>Friday 5 Mar 2027</strong>. Adding the new
+      Precalculus refresher pushed the finish a week past the original 4-month window — see the
+      note below rather than a silently-dropped course.
+    </p>
+    <div class="progress-card">
+      <div class="progress-label"><strong id="doneCount">0</strong> / 16 courses checked off</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressPct">0%</div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>How this plan is built</h2>
+    <p>
+      The order isn't arbitrary — it's the same sequencing used to build the courses in the app:
+      a precalculus refresher, then the calculus prerequisite, then four engineering-math
+      foundations, then three physics/engineering bridge courses, then the seven-course Cambridge
+      Nuclear Energy MPhil core (NE1–NE9), each capstone closing a question an earlier course
+      opened.
+    </p>
+    <div class="note-grid">
+      <div class="note-card"><p class="k">Pace</p><p class="v">~1 region / day</p></div>
+      <div class="note-card"><p class="k">Rhythm</p><p class="v">Weekdays: new material &middot; Weekends: quests + review</p></div>
+      <div class="note-card"><p class="k">Total scope</p><p class="v">16 courses · 446 lesson nodes</p></div>
+      <div class="note-card"><p class="k">Quest style</p><p class="v">By-hand math, not code-heavy (except Numerical Methods &amp; Computational Modelling)</p></div>
+    </div>
+    <p>
+      Each course is organised into 7 regions (Calculus has 9, the new Precalculus refresher has
+      5) — a week at the standard 7-day pace is roughly one region a day. The four bigger/harder
+      courses (Calculus, Differential Equations, Computational Reactor Modelling, and the final
+      Advanced Fission &amp; Fusion capstone) get 10 days instead of 7, so the pace there eases to
+      under one region a day on purpose.
+    </p>
+    <p>
+      <strong>Honest tradeoff:</strong> the original plan fit exactly 15 courses into 4 months with
+      a 2-day buffer at the end. Precalculus adds a genuine 7th day of content, and that buffer is
+      what absorbed it — the plan below now runs to 5 Mar 2027, one week past "4 months from
+      November," with no slack left at all. If you'd rather stay strictly inside 4 months, the
+      cleanest cut is dropping one of the four 10-day courses back to 7 — Differential Equations
+      and Computational Reactor Modelling are the two that tolerate that best. Otherwise, treat the
+      extra week as the honest cost of the new prerequisite, not a rounding error.
+    </p>
+    <p>
+      Two course-weeks land on the winter holidays (flagged below, now on Nuclear &amp; Particle
+      Physics and Thermodynamics instead of their original slots). Shift freely; nothing in the app
+      enforces a deadline, and progress per course is saved independently, so skipping ahead or
+      circling back costs nothing.
+    </p>
+  </section>
+
+  <div class="tier-head tier0"><h2>Tier 0 — Precalculus Refresher</h2><span class="tier-meta">Nov 2 – Nov 8</span></div>
+  <div class="tier-rule tier0"></div>
+
+  <div class="course" data-key="precalc">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Nov 2 – Nov 8 &middot; 7 days</div>
+      <div class="title">Precalculus for Programmers: Algebra to the Unit Circle</div>
+      <div class="meta">New. Every rule derived from a definition, not stated as a mnemonic — the quadratic formula from completing the square, log laws from exponent laws, unit-circle values from actual triangle geometry. Closes with a secant-to-tangent node that hands off directly into Calculus's own first lesson on limits.</div>
+    </div>
+    <div class="scope">25 nodes<br>5 regions</div>
+  </div>
+
+  <div class="tier-head tierA"><h2>Tier A — Math Foundations</h2><span class="tier-meta">Nov 9 – Dec 12</span></div>
+  <div class="tier-rule tierA"></div>
+
+  <div class="course" data-key="calculus">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Nov 9 – Nov 18 &middot; 10 days</div>
+      <div class="title">Calculus for Programmers: From Limits to Differential Equations</div>
+      <div class="meta">The prerequisite everything else assumes. Not part of the Masters-Course track itself, but load-bearing for all 14 that follow.</div>
+    </div>
+    <div class="scope">31 nodes<br>9 regions</div>
+  </div>
+
+  <div class="course" data-key="linalg">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Nov 19 – Nov 25 &middot; 7 days</div>
+      <div class="title">Linear Algebra for Engineers: Vectors to Eigenstructure <em>(Masters Course)</em></div>
+      <div class="meta">Capstone resolves its own reactor-criticality teaser (k=1.5, supercritical) — a thread Reactor Physics later reopens for real.</div>
+    </div>
+    <div class="scope">28 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="diffeq">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Nov 26 – Dec 5 &middot; 10 days</div>
+      <div class="title">Differential Equations &amp; PDEs for Engineers: Decay to Diffusion <em>(Masters Course)</em></div>
+      <div class="meta">Capstone scales a two-isotope decay chain up to a reactor's point-kinetics response (~19.7% power rise).</div>
+    </div>
+    <div class="scope">32 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="probstat">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Dec 6 – Dec 12 &middot; 7 days</div>
+      <div class="title">Probability &amp; Statistics for Engineers: Counts to Confidence <em>(Masters Course)</em></div>
+      <div class="meta">Capstone runs a full radiation-screening calculation end to end — Poisson model, MLE, confidence interval, hypothesis test.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="tier-head tierA"><h2>Tier A, cont. — Numerical Methods</h2><span class="tier-meta">Dec 13 – Dec 19</span></div>
+  <div class="tier-rule tierA"></div>
+
+  <div class="course" data-key="numerical">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Dec 13 – Dec 19 &middot; 7 days</div>
+      <div class="title">Numerical Methods &amp; Monte Carlo Methods for Engineers <em>(Masters Course)</em></div>
+      <div class="meta">Deliberately code-heavy. Capstone re-solves Diffeq's own point-kinetics system two independent numerical ways and finds a genuine, explained discrepancy with the closed-form answer.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="tier-head tierB"><h2>Tier B — Engineering Science Bridge</h2><span class="tier-meta">Dec 20 – Jan 9</span></div>
+  <div class="tier-rule tierB"></div>
+
+  <div class="course" data-key="npp">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Dec 20 – Dec 26 &middot; 7 days</div>
+      <div class="title">Nuclear &amp; Particle Physics Fundamentals <em>(Masters Course)</em></div>
+      <div class="meta">Capstone traces thermal-neutron fission end to end — derives ~200 MeV and ν≈2.43, and where β=0.0065 actually comes from.</div>
+      <span class="flag">⚠ holiday week — expect a slower pace, that's fine</span>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="thermo">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Dec 27 – Jan 2 &middot; 7 days</div>
+      <div class="title">Thermodynamics &amp; Heat Transfer for Engineers <em>(Masters Course)</em></div>
+      <div class="meta">Capstone drives the shared 3000 MWth reactor through a real Rankine cycle to 1107 MWe.</div>
+      <span class="flag">⚠ holiday week — expect a slower pace, that's fine</span>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="fluids">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Jan 3 – Jan 9 &middot; 7 days</div>
+      <div class="title">Fluid Mechanics for Engineers <em>(Masters Course)</em></div>
+      <div class="meta">Capstone sizes that same reactor's primary coolant loop from first principles — the reactor every course from here on shares.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="tier-head tierC"><h2>Tier C — Nuclear Core (NE1–NE9)</h2><span class="tier-meta">Jan 10 – Mar 5</span></div>
+  <div class="tier-rule tierC"></div>
+
+  <div class="course" data-key="rp">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Jan 10 – Jan 16 &middot; 7 days</div>
+      <div class="title">Reactor Physics (NE1) <em>(Masters Course)</em></div>
+      <div class="meta">Finds the shared reactor genuinely critical: k_eff = 1.0337 (5.02$) — closing Linear Algebra's own k=1.5 thread for real.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="nth">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Jan 17 – Jan 23 &middot; 7 days</div>
+      <div class="title">Nuclear Reactor Thermal-Hydraulics (NE2) <em>(Masters Course)</em></div>
+      <div class="meta">Checks that same reactor thermally: 927.49K melt margin, DNBR 1.4028 — all checks pass.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="nmat">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Jan 24 – Jan 30 &middot; 7 days</div>
+      <div class="title">Nuclear Materials &amp; Radiation Damage (NE3) <em>(Masters Course)</em></div>
+      <div class="meta">Reruns NTH's own melt-margin verdict with realistic end-of-life material properties — finds a confirmed FAILURE (-1171.09K margin).</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="nfcw">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Jan 31 – Feb 6 &middot; 7 days</div>
+      <div class="title">Nuclear Fuel Cycle, Waste &amp; Decommissioning (NE4) <em>(Masters Course)</em></div>
+      <div class="meta">Follows the reactor's annual fuel reload through enrichment, burnup, dry-cask storage and waste mass.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="nsre">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Feb 7 – Feb 13 &middot; 7 days</div>
+      <div class="title">Nuclear Safety Principles &amp; Risk Engineering (NE5) <em>(Masters Course)</em></div>
+      <div class="meta">Builds a full PRA toolkit, then clears all three real NRC safety goals (CDF, LERF, QHO) at a 19% margin each.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="cm">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Feb 14 – Feb 23 &middot; 10 days</div>
+      <div class="title">Computational Reactor Modelling (NE8) <em>(Masters Course)</em></div>
+      <div class="meta">Deliberately code-heavy, like Numerical Methods. Capstone's simulated k_eff = 1.0317 lands within 0.19% of Reactor Physics' own closed-form answer.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <div class="course" data-key="aff">
+    <input type="checkbox" class="check">
+    <div>
+      <div class="dates">Feb 24 – Mar 5 &middot; 10 days</div>
+      <div class="title">Advanced Fission &amp; Fusion Reactor Systems (NE9) <em>(Masters Course)</em></div>
+      <div class="meta">The final course. Synthesizes the whole track's shared reactor history and closes with an honest fission-vs-fusion trade-off — no declared winner.</div>
+    </div>
+    <div class="scope">30 nodes<br>7 regions</div>
+  </div>
+
+  <footer>
+    <p><strong>No buffer left this time:</strong> the 2-day end slack the original plan had is exactly what the new Precalculus week spent. If a holiday week (or anything else) slips, the cleanest fix is pulling a day or two from Differential Equations or Computational Reactor Modelling's own 10-day blocks rather than letting the whole plan drift.</p>
+    <p>In the app, open the 📚 course picker and match the title text above exactly (course order there doesn't matter — progress per course is saved independently, so jumping around costs nothing).</p>
+    <p>Nuclear-track quests lean on by-hand derivation and proof, not software builds — except Numerical Methods and Computational Reactor Modelling, which are deliberately code-heavy. Precalculus follows the same by-hand-derivation spirit: light numeric checks that verify a hand derivation, never a software build in its own right.</p>
+    <p>Checkboxes save in this browser only (<code>localStorage</code>) — they won't follow you to another device.</p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var KEY = 'du-mphil-plan-v1';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.check'));
+  var fill = document.getElementById('progressFill');
+  var pctEl = document.getElementById('progressPct');
+  var countEl = document.getElementById('doneCount');
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function render() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    var pct = Math.round((done / boxes.length) * 100);
+    fill.style.width = pct + '%';
+    pctEl.textContent = pct + '%';
+    countEl.textContent = done;
+  }
+
+  var state = load();
+  boxes.forEach(function (b) {
+    var key = b.closest('.course').getAttribute('data-key');
+    b.checked = !!state[key];
+    b.closest('.course').classList.toggle('done', b.checked);
+    b.addEventListener('change', function () {
+      state[key] = b.checked;
+      save(state);
+      b.closest('.course').classList.toggle('done', b.checked);
+      render();
+    });
+  });
+  render();
+})();
+</script>
+
+</body>
+</html>
